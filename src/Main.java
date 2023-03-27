@@ -97,32 +97,6 @@ public class Main {
             }
             System.out.print("Command : ");
         }
-//        SecretKey secretKey = crypto.generateKey(KeySpace.BIT128);
-//        IvParameterSpec iv = crypto.generateIv(KeySpace.BIT128);
-//        String algorithm = "AES/CBC/PKCS5Padding";
-//        String input = "baeldung";
-//        String cipherText = crypto.encrypt(algorithm, input, secretKey, iv);
-//        String plainText = crypto.decrypt(algorithm, cipherText, secretKey, iv);
-//
-//        System.out.println("PlainText Input : " + input);
-//        System.out.println("CipherText : " + cipherText);
-//        System.out.println("PlainText : " + plainText);
-//
-//        String filePath = "C:\\Users\\wit_w\\Desktop\\Test\\2562-2-Lecture-08-RSAandElgamal.pdf";
-//        String encryptFilePath = "C:\\Users\\wit_w\\Desktop\\Test\\file.encrypted";
-//        String decryptFilePath = "C:\\Users\\wit_w\\Desktop\\Test\\decryptWord.rtf";
-//
-//
-//
-////        File file = new File("C:\\Users\\wit_w\\Desktop\\Test\\text.txt");
-////        File encryptedFile = new File("C:\\Users\\wit_w\\Desktop\\Test\\encrypt.txt");
-////        File decryptedFile = new File("C:\\Users\\wit_w\\Desktop\\Test\\decrypt.txt");
-//        File file = new File(filePath);
-//        File encryptedFile = new File(encryptFilePath);
-//        File decryptedFile = new File(decryptFilePath);
-////        crypto.encryptFile(algorithm, secretKey, iv, file, encryptedFile);
-//        crypto.encryptFile(algorithm, secretKey, iv, file);
-////        crypto.decryptFile(algorithm, secretKey, iv, encryptedFile, decryptedFile);
-//        crypto.decryptFile(algorithm, secretKey, iv, encryptedFile);
+
     }
 }
