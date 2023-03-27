@@ -1,0 +1,301 @@
+//import java.io.File;
+//import java.io.IOException;
+//import java.math.BigInteger;
+//import java.nio.charset.StandardCharsets;
+//import java.nio.file.Files;
+//import java.nio.file.Paths;
+//import java.util.*;
+//
+//public class Main {
+////    public static class Key {
+////        public static final int BIT128 = 128;
+////        public static final int BIT192 = 192;
+////        public static final int BIT256 = 256;
+////    }
+//
+////    public static void main(String[] args) throws IOException {
+////        String path = "C:\\Users\\wit_w\\Desktop\\Test\\txt text.txt";
+//////        String path2 = "C:\\Users\\wit_w\\Desktop\\Test\\word text.rtf";
+////
+////        File file = new File(path);
+//////      TODO IF FILE SIZE MORE INTEGER
+////        byte[] fileBytes = Files.readAllBytes(Paths.get(path));
+////        byte[] keyBytes1 = getKey(Key.BIT128);
+////        byte[] keyBytes2 = getKey(Key.BIT128);
+////        byte[] keyBytes3 = getKey(Key.BIT128);
+////
+////        byte[] encryptBytes1 = encryption(fileBytes, keyBytes1);
+////        byte[] encryptBytes2 = encryption(encryptBytes1, keyBytes2);
+////        byte[] encryptBytes3 = encryption(encryptBytes2, keyBytes3);
+//////        byte[] decryptBytes3 = decryption(encryptBytes3, keyBytes3);
+//////        byte[] decryptBytes2 = decryption(decryptBytes3, keyBytes2);
+//////        byte[] decryptBytes1 = decryption(decryptBytes2, keyBytes1);
+////        BigInteger bigInteger = new BigInteger(encryptBytes1);
+////        BigInteger bigInteger1 = new BigInteger(encryptBytes2);
+//////        bigInteger1.
+//////        System.out.println(encryptBytes1.length);
+//////        System.out.println(bigInteger.toByteArray().length);
+//////        System.out.println(bigInteger.shiftLeft(1).toByteArray().length);
+////
+////        byte[] key = getKey(Key.BIT128);
+////        byte[] initialKey = {19, 42, -10, 88, -115, -19, 3, 114, 120, 54, -87, 13, 91, 94, 45, 22};
+////        byte[] initialKey2 = {123, -73, -100, 121, 6, 97, -67, -10, -75, 1, -21, -96, -84, -79, 70, 118};
+////
+////        System.out.println(Arrays.toString(initialKey));
+////        byte[] hash = hashCode("ABC".getBytes(), initialKey);
+////        System.out.println(bytesToHex(hash));
+////        System.out.println(Arrays.toString(hash));
+////        byte[] hash2 = hashCode("A".getBytes(), initialKey);
+////        System.out.println(bytesToHex(hash2));
+////        System.out.println(Arrays.toString(hash2));
+////        byte[] hash3 = hashCode("C".getBytes(), initialKey);
+////        System.out.println(bytesToHex(hash3));
+////        System.out.println(Arrays.toString(hash3));
+////        byte[] hash4 = hashCode("D".getBytes(), initialKey);
+////        System.out.println(bytesToHex(hash4));
+////        System.out.println(Arrays.toString(hash4));
+////        byte[] hash5 = hashCode("Z".getBytes(), initialKey);
+////        System.out.println(bytesToHex(hash5));
+////        System.out.println(Arrays.toString(hash5));
+////
+////
+//////        Set<BigInteger> set = new HashSet<>();
+//////        byte[] text = new byte[16];
+//////        int b8 = 0, b9 = 0, b10 = 0, b11 = 0, b12 = 0, b13 = 0, b14 = 0;
+//////        for (int i = Integer.MIN_VALUE; i < Integer.MAX_VALUE ; i++) {
+//////            text[15]++;
+//////            if (text[15] == 0) {
+//////                b14++;
+//////                text[14]++;
+//////            }
+//////            if (text[14] == 0 && b14 != 0) {
+//////                b13++;
+//////                text[13]++;
+//////            }
+//////            if (text[13] == 0 && b13 != 0) {
+//////                b12++;
+//////                text[12]++;
+//////            }
+//////            if (text[12] == 0 && b12 != 0) {
+//////                b11++;
+//////                text[11]++;
+//////            }
+//////            if (text[11] == 0 && b11 != 0) {
+//////                b10++;
+//////                text[10]++;
+//////            }
+//////            if (text[10] == 0 && b10 != 0) {
+//////                b9++;
+//////                text[9]++;
+//////            }
+//////            if (text[9] == 0 && b9 != 0) {
+//////                b8++;
+//////                text[8]++;
+//////            }
+//////            i++;
+//////            BigInteger newBytes = new BigInteger(hashCode(text, initialKey));
+//////            if (set.contains(newBytes)) {
+//////                System.out.println("Duplicate HashCode in " + newBytes.bitLength() + " Bits!");
+//////                break;
+//////            }
+//////            set.add(newBytes);
+//////            if (i % 1000000 == 0){
+//////                System.out.println(Arrays.toString(text));
+//////            }
+//////            b14 = 0; b13 = 0; b12 = 0; b11 = 0; b10 = 0; b9 = 0; b8 = 0;
+//////        }
+////
+////
+////
+//////        byte[] decryptBytes = decryption(encryptBytes, keyBytes);
+////
+////
+//////        System.out.println("File bytes  :     " + Arrays.toString(fileBytes));
+//////        System.out.println("Key bytes 1 :     " + Arrays.toString(keyBytes1));
+//////        System.out.println("Encrypt bytes 1 : " + Arrays.toString(encryptBytes1));
+////////        System.out.println("Decrypt bytes : " + Arrays.toString(decryptBytes));
+//////
+//////        System.out.println("Key bytes 2 :     " + Arrays.toString(keyBytes2));
+//////        System.out.println("Encrypt bytes 2 : " + Arrays.toString(encryptBytes2));
+//////
+//////        System.out.println("Key bytes 3 :     " + Arrays.toString(keyBytes3));
+//////        System.out.println("Encrypt bytes 3 : " + Arrays.toString(encryptBytes3));
+//////
+//////        System.out.println("  Decrypt : " + new String(decryptBytes1));
+//////
+//////
+//////
+//////        System.out.println("     File : " + new String(fileBytes));
+//////
+//////        System.out.println("      Key : " + new String(keyBytes1));
+//////        System.out.println("  Encrypt : " + new String(encryptBytes1));
+//////
+//////        System.out.println("      Key : " + new String(keyBytes2));
+//////        System.out.println("  Encrypt : " + new String(encryptBytes2));
+//////
+//////        System.out.println("      Key : " + new String(keyBytes3));
+//////        System.out.println("  Encrypt : " + new String(encryptBytes3));
+////
+////
+////
+////
+////
+//////        System.out.println("     File : " + new String(fileBytes));
+//////        System.out.println("      Key : " + new String(keyBytes));
+//////        System.out.println("  Encrypt : " + new String(encryptBytes));
+//////        System.out.println("  Decrypt : " + new String(decryptBytes));
+////
+//////        System.out.println("File bytes :    " + Arrays.toString(fileBytes));
+//////        System.out.println("Key bytes :     " + Arrays.toString(keyBytes));
+//////        System.out.println("Encrypt bytes : " + Arrays.toString(encryptBytes));
+//////        System.out.println("Decrypt bytes : " + Arrays.toString(decryptBytes));
+////
+////
+////
+//////        getKey(111);
+//////        String text = new String(byteArr, StandardCharsets.UTF_8);
+//////        System.out.println(text);
+//////        String key = getKey(Key.BIT128);
+//////        System.out.println(file.length());
+//////        System.out.println(Arrays.toString(keyBytes));
+////        Set<byte[]> set = new HashSet<>();
+////        BigInteger num = new BigInteger("-1");
+////        int i = 0;
+////        while (num.intValue() != -1){
+////            num = num.add(BigInteger.valueOf(1));
+////            byte[] bytes = padBytes(num.toByteArray());
+////            byte[] newBytes = hashCode(bytes, initialKey);
+////            byte[] newBytes2 = hashCode(newBytes, initialKey2);
+////
+////            if (set.contains(newBytes2)){
+////                System.out.println("Duplicate HashCode!");
+////                break;
+////            }
+////            else {
+////                set.add(newBytes2);
+////            }
+////            if (i % 1000000 == 0) {
+////                System.out.println(Arrays.toString(num.toByteArray()));
+////                System.out.println("Loop : " + i);
+////            }
+////            i++;
+////        }
+////
+////    }
+//////    private static byte[] hashCode(byte[] messageBytes){
+//////        if (messageBytes == null || messageBytes.length == 0 ){
+//////            throw new IllegalArgumentException("Invalid message!");
+//////        }
+//////        if (messageBytes.length != 16) {
+//////            messageBytes = padBytes(messageBytes);
+//////        }
+////////        byte[] initial = {-128, -85, 0, 85, 127};
+//////        byte[] hashCode = new byte[16];
+//////        hashCode[0] = (byte) (messageBytes[0] ^ (byte) 85  ^ messageBytes[messageBytes.length -1]);
+////////        hashCode[0] = (byte) (messageBytes[0] ^ initial[messageBytes[0] % 5]  ^ messageBytes[messageBytes.length -1]);
+//////        short b = 1;
+//////        for (; b < messageBytes.length; b++) {
+//////            hashCode[b] = (byte) (((messageBytes[b] ^ b) ^ messageBytes[messageBytes.length-1]) + hashCode[b-1]);
+//////        }
+//////        hashCode[0] = (byte) (hashCode[0] + hashCode[hashCode.length - 1]);
+//////        return hashCode;
+//////    }
+//////    private static byte[] hashCode(byte[] messageBytes, byte[] key){
+//////        if (messageBytes == null || messageBytes.length == 0 ){
+//////            throw new IllegalArgumentException("Invalid message!");
+//////        }
+//////        if (messageBytes.length != 16) {
+//////            messageBytes = padBytes(messageBytes);
+//////        }
+//////        byte[] hashCode = new byte[16];
+//////        byte firstHash = (byte) (messageBytes[15] + key[15]);
+//////        hashCode[14] = (byte) ((firstHash << 2) + (firstHash << 1) + firstHash);
+//////        for (int i = messageBytes.length -2; i > 0; i--) {
+//////            byte code = (byte) ((messageBytes[i] + key[i]) ^ hashCode[i]);
+//////            hashCode[i-1] = (byte) ((code << 2) + (code << 1) + code);
+//////        }
+//////        byte lastCode = (byte) ((messageBytes[0] + key[0]) ^ hashCode[0]);
+//////        lastCode = (byte) (((lastCode << 1) + lastCode ) >> 2);
+//////        hashCode[15] = lastCode;
+//////        lastCode = (byte) (lastCode + hashCode[14]);
+//////        hashCode[14] = (byte) ((lastCode << 2) + (lastCode << 1) + lastCode);
+//////        return hashCode;
+//////    }
+//    private static byte[] hashCode(byte[] messageBytes, byte[] key){
+//        if (messageBytes == null || messageBytes.length == 0 ){
+//            throw new IllegalArgumentException("Invalid message!");
+//        }
+//        if (messageBytes.length != 16) {
+//            messageBytes = padBytes(messageBytes);
+//        }
+//        byte[] hashCode = new byte[16];
+//        hashCode[15] = 85;
+//        for (int i = messageBytes.length -1; i > 0; i--) {
+//            byte code = (byte) ((messageBytes[i] + key[i]) ^ hashCode[i]);
+//            hashCode[i-1] = (byte) ((code << 2) + (code << 1) + code);
+//        }
+//        byte lastCode = (byte) ((messageBytes[0] + key[0]) ^ hashCode[0]);
+//        lastCode = (byte) (((lastCode << 1) + lastCode ) >> 2);
+//        hashCode[15] = lastCode;
+//        return hashCode;
+//    }
+//    private static byte[] padBytes(byte[] messageBytes) {
+//        if (messageBytes.length == 16) {
+//            return messageBytes;
+//        }
+//        byte[] newMessageByte  = new byte[16];
+//        for (int i = messageBytes.length - 1, b = newMessageByte.length - 1; i >= 0; i--, b--) {
+//            newMessageByte[b] = messageBytes[i];
+//        }
+//        return newMessageByte;
+//    }
+//    private static byte[] decryption(byte[] encryptBytes, byte[] keyBytes) {
+//        byte[] decryptBytes = new byte[encryptBytes.length];
+//        int key = 0;
+//        for (int b = 0; b < encryptBytes.length; b++) {
+//            decryptBytes[b] = (byte) (encryptBytes[b] ^ keyBytes[key]);
+//            key = (key + 1) % keyBytes.length;
+//        }
+//        return decryptBytes;
+//    }
+//    private static byte[] encryption(byte[] fileBytes, byte[] keyBytes) {
+//        int padBytes = (fileBytes.length % keyBytes.length);
+//        if (padBytes != 0) {
+//            padBytes = keyBytes.length - padBytes;
+//        }
+//        byte[] encryptBytes = new byte[(int) (fileBytes.length + padBytes)];
+//        int b = 0;
+//        int key = 0;
+//        for (; b < fileBytes.length; b++) {
+//            encryptBytes[b] = (byte) (fileBytes[b] ^ keyBytes[key]);
+//            key = (key + 1) % keyBytes.length;
+//        }
+//        for (; b < encryptBytes.length; b++) {
+//            encryptBytes[b] = (byte) (0 ^ keyBytes[key]);
+//            key = (key + 1) % keyBytes.length;
+//        }
+//        return encryptBytes;
+//    }
+//    private static byte[] getKey(int keySize) {
+//        if (keySize != Key.BIT256 && keySize != Key.BIT192 && keySize != Key.BIT128) {
+//            throw new IllegalArgumentException("Invalid key size!");
+//        }
+//        Random random = new Random();
+//        byte[] byteList = new byte[keySize / 8 ];
+//        for (int b = 0; b < byteList.length; b++) {
+//            byteList[b] = (byte) (random.nextInt());
+//        }
+//        return byteList;
+//    }
+//
+//    private static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+//    public static String bytesToHex(byte[] bytes) {
+//        char[] hexChars = new char[bytes.length * 2];
+//        for (int j = 0; j < bytes.length; j++) {
+//            int v = bytes[j] & 0xFF;
+//            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+//            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+//        }
+//        return new String(hexChars);
+//    }
+//}
