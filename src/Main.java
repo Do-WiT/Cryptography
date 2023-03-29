@@ -1,38 +1,24 @@
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.io.File;
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import java.security.KeyPair;
 import java.util.Scanner;
 
-
 public class Main {
-    public static void main(String[] args) throws NoSuchAlgorithmException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, IOException, ClassNotFoundException {
+    public static void main(String[] args) throws Exception {
         Scanner in = new Scanner(System.in);
         Crypto crypto = new Crypto();
-        String algorithm = "AES/CBC/PKCS5Padding";
-
 //        TODO PRINT COMMAND LIST
         System.out.print("Command : ");
         loop : while (in.hasNextLine()){
             String command = in.nextLine().trim().toLowerCase();
             switch (command) {
-                case "gentkey":
+                case "gentkey": {
                     System.out.print(" - Enter key size(bit) : ");
                     int keySize = Integer.parseInt(in.nextLine().trim());
-                    SecretKey key = crypto.generateKey(keySize);
-                    System.out.println(" - Secret key : " + Base64.getEncoder().encodeToString(key.getEncoded()));
+                    String key = crypto.generateKey(keySize);
+                    System.out.println(" - Secret key : " + key);
                     break;
+                }
                 case "gentiv": {
-                    IvParameterSpec iv = crypto.generateIv();
-                    System.out.println(" - IV : " + Base64.getEncoder().encodeToString(iv.getIV()));
+                    System.out.println(" - IV : " + crypto.generateIv());
                     break;
                 }
                 case "encrypttext": {
@@ -42,9 +28,7 @@ public class Main {
                     String iv = in.nextLine();
                     System.out.print(" - Enter text : ");
                     String text = in.nextLine();
-                    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-                    byte[] ivBytes = Base64.getDecoder().decode(iv);
-                    String cipherText = crypto.encrypt(algorithm, text, new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES"), new IvParameterSpec(ivBytes));
+                    String cipherText = crypto.encrypt(text, secretKey, iv);
                     System.out.println(" - Cipher text : " + cipherText);
                     break;
                 }
@@ -55,9 +39,7 @@ public class Main {
                     String iv = in.nextLine();
                     System.out.print(" - Enter cipher text : ");
                     String text = in.nextLine();
-                    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-                    byte[] ivBytes = Base64.getDecoder().decode(iv);
-                    String plainText = crypto.decrypt(algorithm, text, new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES"), new IvParameterSpec(ivBytes));
+                    String plainText = crypto.decrypt(text, secretKey, iv);
                     System.out.println(" - Plain text : " + plainText);
 
                     break;
@@ -69,9 +51,7 @@ public class Main {
                     String iv = in.nextLine();
                     System.out.print(" - Enter file path : ");
                     String path = in.nextLine();
-                    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-                    byte[] ivBytes = Base64.getDecoder().decode(iv);
-                    crypto.encryptFile(algorithm, new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES"), new IvParameterSpec(ivBytes), path);
+                    crypto.encryptFile(secretKey, iv, path);
                     System.out.println(" - Encrypted File");
                     break;
                 }
@@ -82,10 +62,34 @@ public class Main {
                     String iv = in.nextLine();
                     System.out.print(" - Enter file path : ");
                     String path = in.nextLine();
-                    byte[] keyBytes = Base64.getDecoder().decode(secretKey);
-                    byte[] ivBytes = Base64.getDecoder().decode(iv);
-                    crypto.decryptFile(algorithm, new SecretKeySpec(keyBytes, 0, keyBytes.length, "AES"), new IvParameterSpec(ivBytes), path);
+                    crypto.decryptFile(secretKey, iv, path);
                     System.out.println(" - Decrypted File");
+                    break;
+                }
+                case "gentkeypair": {
+                    System.out.print(" - Enter key size(bit) : ");
+                    int keySize = Integer.parseInt(in.nextLine().trim());
+                    KeyPair keyPair = crypto.generateKeyPair(keySize);
+                    System.out.println(" - Public key : " + Utilities.enBase64(keyPair.getPublic().getEncoded()));
+                    System.out.println(" - Private key : " + Utilities.enBase64(keyPair.getPrivate().getEncoded()));
+                    break ;
+                }
+                case "publicencrypt": {
+                    System.out.print(" - Enter public key : ");
+                    String publicKey = in.nextLine();
+                    System.out.print(" - Enter text : ");
+                    String text = in.nextLine();
+                    String cipher = crypto.publicEncrypt(publicKey, text);
+                    System.out.println(" - Cipher text : " + cipher);
+                    break;
+                }
+                case "publicdecrypt": {
+                    System.out.print(" - Enter private key : ");
+                    String privateKey = in.nextLine();
+                    System.out.print(" - Enter cipher : ");
+                    String cipher = in.nextLine();
+                    String text = crypto.publicDecrypt(privateKey, cipher);
+                    System.out.println(" - Plain text : " + text);
                     break;
                 }
                 case "q": {
