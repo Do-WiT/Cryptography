@@ -1,3 +1,5 @@
+package utils;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -29,7 +31,7 @@ public class MultiFile implements Serializable {
 
     @Override
     public String toString() {
-        return "MultiFile{" +
+        return "Utilities.MultiFile{" +
                 "fileName='" + fileName + '\'' +
                 ", content=" + Arrays.toString(content) +
                 '}';

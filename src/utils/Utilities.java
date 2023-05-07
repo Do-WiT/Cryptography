@@ -1,3 +1,5 @@
+package utils;
+
 import java.io.*;
 import java.util.Base64;
 
@@ -5,6 +7,9 @@ public class Utilities {
 
     public static  String enBase64(byte[] bytes){
         return Base64.getEncoder().encodeToString(bytes);
+    }
+    public static  String enBase64(String str){
+        return Base64.getEncoder().encodeToString(str.getBytes());
     }
     public static byte[] deBase64(String base64){
         return Base64.getDecoder().decode(base64);
@@ -20,4 +25,9 @@ public class Utilities {
         ObjectInputStream is = new ObjectInputStream(in);
         return is.readObject();
     }
+
+
+
+
+
 }
