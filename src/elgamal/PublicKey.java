@@ -2,7 +2,7 @@ package elgamal;
 
 import java.math.BigInteger;
 
-public class PublicKey implements Key{
+public class PublicKey {
     private BigInteger p;
     private BigInteger q;
     private BigInteger y;

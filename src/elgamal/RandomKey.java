@@ -2,7 +2,7 @@ package elgamal;
 
 import java.math.BigInteger;
 
-public class RandomKey implements Key{
+public class RandomKey {
     private BigInteger randomKey;
 
     public RandomKey(BigInteger randomKey) {

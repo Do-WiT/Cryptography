@@ -61,6 +61,7 @@ public class Crypto {
         byte[] multiFileBytes = Utilities.serialize(multiFile);
         Cipher cipher = Cipher.getInstance(algorithm + "/" + cipherMode + "/" + pad);
         cipher.init(Cipher.ENCRYPT_MODE, secretKey, ivParameterSpec);
+
         byte[] cipherText = cipher.doFinal(multiFileBytes);
         FileOutputStream outputStream = new FileOutputStream(file.getParent() + "\\"+ "file.encrypted");
         outputStream.write(cipherText);

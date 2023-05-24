@@ -1,6 +1,6 @@
 package elgamal;
 
-public class KeyPair implements Key{
+public class KeyPair {
     private PublicKey publicKey;
     private PrivateKey privateKey;
 

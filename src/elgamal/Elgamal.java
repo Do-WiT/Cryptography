@@ -5,8 +5,17 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Elgamal {
+//    public KeyPair generateKeyPair(int keySize) {
+//        BigInteger p = genP(keySize);
+//        BigInteger q = genQ(p);
+//        BigInteger u = genU(p);
+//        BigInteger y = fastExpo(q, u, p);
+//        PublicKey publicKey = new PublicKey(p, q, y);
+//        PrivateKey privateKey = new PrivateKey(u);
+//        return new KeyPair(publicKey, privateKey);
+//    }
     public KeyPair generateKeyPair(int keySize) {
-        BigInteger p = genP(keySize);
+        BigInteger p = randomGenP(keySize);
         BigInteger q = genQ(p);
         BigInteger u = genU(p);
         BigInteger y = fastExpo(q, u, p);
@@ -27,14 +36,25 @@ public class Elgamal {
 
         return "";
     }
+    public String encrypt(byte[] plainText, PublicKey publicKey, RandomKey randomKey, PrivateKey privateKey){
+        BigInteger m = new BigInteger(plainText);
+        System.out.println("m : " + m);
+        BigInteger a = fastExpo(publicKey.getQ(), randomKey.getRandomKey(), publicKey.getP());
+        BigInteger b = (fastExpo(publicKey.getY(), randomKey.getRandomKey(), publicKey.getP()).multiply(m)).mod(publicKey.getP());
+        System.out.println("a : " + a);
+        System.out.println("b : " + b);
+
+        decrypt(a, b, publicKey, privateKey);
+
+        return "";
+    }
     public String decrypt(BigInteger a, BigInteger b, PublicKey publicKey, PrivateKey privateKey){
         a = fastExpo(a, privateKey.getU(), publicKey.getP());
         a = a.modInverse(publicKey.getP());
         System.out.println("mb : " + a.multiply(b).mod(publicKey.getP()));
-
+        System.out.println("bytes : " + Arrays.toString(a.multiply(b).mod(publicKey.getP()).toByteArray()));
         return "";
     }
-
     public RandomKey generateRandomKey(BigInteger p){
         BigInteger k = BigInteger.TWO;
         BigInteger min = BigInteger.TWO;
@@ -53,6 +73,38 @@ public class Elgamal {
             p = randomBigInt(min, max);
         }
         while (!p.isProbablePrime(p.bitLength()));
+        return p;
+    }
+    public BigInteger randomGenP(int keySize) {
+        BigInteger maxBound = BigInteger.TWO.pow(keySize).subtract(BigInteger.ONE);
+        System.out.println("MaxB:       " + maxBound);
+        BigInteger min = BigInteger.TWO.pow(keySize -2);
+        BigInteger max = BigInteger.TWO.pow(keySize -1).subtract(BigInteger.ONE);
+        BigInteger avg = (min.add(max)).divide(BigInteger.TWO);
+        BigInteger p = BigInteger.TWO;
+        Set<BigInteger> primeFactor = new HashSet<>();
+        primeFactor.add(p);
+        System.out.println("Max :       " + max);
+        System.out.println("Min :       " + min);
+        System.out.println("Avg :       " + avg);
+        do {
+            BigInteger pf = randomBigInt(min, avg);
+            if (pf.isProbablePrime(pf.bitLength())){
+                BigInteger pp = p.multiply(pf).add(BigInteger.ONE);
+//                System.out.println("PP : " + pp);
+                if (pp.isProbablePrime(pp.bitLength())){
+                    primeFactor.add(pf);
+                    p = pp;
+                }
+            }
+        }
+        while (p.equals(BigInteger.TWO));
+        System.out.println("RP  :       " + p);
+        System.out.print("Prime Factor : ");
+        primeFactor.forEach(pf -> {
+            System.out.print( " " + pf);
+        });
+        System.out.println();
         return p;
     }
     private BigInteger genQ(BigInteger p) {

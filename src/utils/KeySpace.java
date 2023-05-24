@@ -1,6 +1,8 @@
 package utils;
 
 public class KeySpace {
+    public static final int BIT32 = 32;
+    public static final int BIT64 = 64;
     public static final int BIT128 = 128;
     public static final int BIT192 = 192;
     public static final int BIT256 = 256;
