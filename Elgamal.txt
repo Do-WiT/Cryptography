@@ -1,0 +1,1269 @@
+//package elgamal;
+//
+//import java.math.BigInteger;
+//import java.util.*;
+//import java.util.stream.Collectors;
+//
+//public class Elgamal {
+////    public KeyPair generateKeyPair(int keySize) {
+////        BigInteger p = genP(keySize);
+////        BigInteger q = genQ(p);
+////        BigInteger u = genU(p);
+////        BigInteger y = fastExpo(q, u, p);
+////        PublicKey publicKey = new PublicKey(p, q, y);
+////        PrivateKey privateKey = new PrivateKey(u);
+////        return new KeyPair(publicKey, privateKey);
+////    }
+//    public KeyPair generateKeyPair(int keySize) {
+//        BigInteger p = randomGenP(keySize);
+//        BigInteger q = genQ(p);
+//        BigInteger u = genU(p);
+//        BigInteger y = fastExpo(q, u, p);
+//        PublicKey publicKey = new PublicKey(p, q, y);
+//        PrivateKey privateKey = new PrivateKey(u);
+//        return new KeyPair(publicKey, privateKey);
+//    }
+//
+//    public String encrypt(String plainText, PublicKey publicKey, RandomKey randomKey, PrivateKey privateKey){
+//        BigInteger m = new BigInteger(plainText.getBytes());
+//        System.out.println("m : " + m);
+//        BigInteger a = fastExpo(publicKey.getQ(), randomKey.getRandomKey(), publicKey.getP());
+//        BigInteger b = (fastExpo(publicKey.getY(), randomKey.getRandomKey(), publicKey.getP()).multiply(m)).mod(publicKey.getP());
+//        System.out.println("a : " + a);
+//        System.out.println("b : " + b);
+//
+//        decrypt(a, b, publicKey, privateKey);
+//
+//        return "";
+//    }
+//    public String encrypt(byte[] plainText, PublicKey publicKey, RandomKey randomKey, PrivateKey privateKey){
+//        BigInteger m = new BigInteger(plainText);
+//        System.out.println("m : " + m);
+//        BigInteger a = fastExpo(publicKey.getQ(), randomKey.getRandomKey(), publicKey.getP());
+//        BigInteger b = (fastExpo(publicKey.getY(), randomKey.getRandomKey(), publicKey.getP()).multiply(m)).mod(publicKey.getP());
+//        System.out.println("a : " + a);
+//        System.out.println("b : " + b);
+//
+//        decrypt(a, b, publicKey, privateKey);
+//
+//        return "";
+//    }
+//    public String decrypt(BigInteger a, BigInteger b, PublicKey publicKey, PrivateKey privateKey){
+//        a = fastExpo(a, privateKey.getU(), publicKey.getP());
+//        a = a.modInverse(publicKey.getP());
+//        System.out.println("mb : " + a.multiply(b).mod(publicKey.getP()));
+//        System.out.println("bytes : " + Arrays.toString(a.multiply(b).mod(publicKey.getP()).toByteArray()));
+//        return "";
+//    }
+//    public RandomKey generateRandomKey(BigInteger p){
+//        BigInteger k = BigInteger.TWO;
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        do {
+//            k = randomBigInt(min, max);
+//        }
+//        while (!max.gcd(k).equals(BigInteger.ONE));
+//        return new RandomKey(k);
+//    }
+//    private BigInteger genP(int keySize) {
+//        BigInteger p = BigInteger.TWO;
+//        BigInteger min = BigInteger.TWO.pow(keySize -1);
+//        BigInteger max = BigInteger.TWO.pow(keySize).subtract(BigInteger.ONE);
+//        do {
+//            p = randomBigInt(min, max);
+//        }
+//        while (!p.isProbablePrime(p.bitLength()));
+//        return p;
+//    }
+//    public BigInteger randomGenP(int keySize) {
+//        BigInteger maxBound = BigInteger.TWO.pow(keySize).subtract(BigInteger.ONE);
+//        System.out.println("MaxB:       " + maxBound);
+//        BigInteger min = BigInteger.TWO.pow(keySize -2);
+//        BigInteger max = BigInteger.TWO.pow(keySize -1).subtract(BigInteger.ONE);
+//        BigInteger avg = (min.add(max)).divide(BigInteger.TWO);
+//        BigInteger p = BigInteger.TWO;
+//        Set<BigInteger> primeFactor = new HashSet<>();
+//        primeFactor.add(p);
+//        System.out.println("Max :       " + max);
+//        System.out.println("Min :       " + min);
+//        System.out.println("Avg :       " + avg);
+//        do {
+//            BigInteger pf = randomBigInt(min, avg);
+//            if (pf.isProbablePrime(pf.bitLength())){
+//                BigInteger pp = p.multiply(pf).add(BigInteger.ONE);
+////                System.out.println("PP : " + pp);
+//                if (pp.isProbablePrime(pp.bitLength())){
+//                    primeFactor.add(pf);
+//                    p = pp;
+//                }
+//            }
+//        }
+//        while (p.equals(BigInteger.TWO));
+//        System.out.println("RP  :       " + p);
+//        System.out.print("Prime Factor : ");
+//        primeFactor.forEach(pf -> {
+//            System.out.print( " " + pf);
+//        });
+//        System.out.println();
+//        return p;
+//    }
+//    private BigInteger genQ(BigInteger p) {
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger alpha;
+//        Set<BigInteger> setExpo = getExpoPrimeFactor(p);
+//        do {
+//            alpha = randomBigInt(min, max);
+//        }
+//        while (!isGenerator(alpha, setExpo, p));
+////        TODO IF ALPHA = NULL
+//        return alpha;
+//    }
+//    private BigInteger genU(BigInteger p) {
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        return randomBigInt(min, max);
+//    }
+//    private boolean isGenerator(BigInteger alpha, Set<BigInteger> pf, BigInteger p) {
+//        for (BigInteger pi : pf) {
+//            BigInteger mod = fastExpo(alpha, pi, p);
+//            if (mod.equals(BigInteger.ONE)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+////    private BigInteger fastExpo(BigInteger base, BigInteger expo, BigInteger p) {
+////        String binary = expo.toString(2);
+////        HashMap<BigInteger, BigInteger> degreeMap = new HashMap<>();
+////        int degree = 0;
+////        for (int i = binary.length() -1; i > -1; i--) {
+////            if (binary.charAt(i) == '1') {
+////                degreeMap.put(BigInteger.TWO.pow(degree), null);
+////            }
+////            degree++;
+////        }
+////        BigInteger degreeTwo = BigInteger.ONE;
+////        if (degreeMap.containsKey(degreeTwo)) {
+////            degreeMap.replace(degreeTwo, base);
+////        }
+////        BigInteger res = base;
+////        degree--;
+////        do {
+////            degreeTwo = degreeTwo.multiply(BigInteger.TWO);
+////            base = (base.multiply(base)).mod(p);
+////            if (degreeMap.containsKey(degreeTwo)){
+////                degreeMap.replace(degreeTwo, base);
+////                res = (res.multiply(base)).mod(p);
+////            }
+////        }
+////        while (degree-- != 0);
+////        return res;
+////    }
+//    private BigInteger fastExpo(BigInteger base, BigInteger expo, BigInteger p) {
+//        char[] binary = expo.toString(2).toCharArray();
+//        BigInteger res = BigInteger.ONE;
+//        for (int i = binary.length -2; i > -1 ; i--) {
+//            base = base.multiply(base).mod(p);
+//            if (binary[i] == '1'){
+//                res = res.multiply(base).mod(p);
+//            }
+//        }
+//        return res;
+//    }
+//
+//    private Set<BigInteger> getExpoPrimeFactor(BigInteger p) {
+//        BigInteger expo = p.subtract(BigInteger.ONE);
+//        Set<BigInteger> factorP = primeFactor(expo);
+//        factorP = factorP.stream().map(expo::divide).collect(Collectors.toSet());
+//        return factorP;
+//    }
+//    private Set<BigInteger> primeFactor(BigInteger n) {
+//        Set<BigInteger> primeFactors = new HashSet<>();
+//        if (n.mod(BigInteger.TWO).equals(BigInteger.ZERO)) {
+//            primeFactors.add(BigInteger.TWO);
+//            do {
+//                n = n.divide(BigInteger.TWO);
+//            }
+//            while (n.mod(BigInteger.TWO).equals(BigInteger.ZERO));
+//        }
+//        BigInteger sqrt = n.sqrt();
+//        for (BigInteger i = new BigInteger("3"); i.compareTo(sqrt) < 0; i = i.add(BigInteger.TWO)) {
+//            if (n.mod(i).equals(BigInteger.ZERO)) {
+//                primeFactors.add(i);
+//                do {
+//                    n = n.divide(i);
+//                }
+//                while (n.mod(i).equals(BigInteger.ZERO));
+//            }
+//        }
+//        if (n.compareTo(BigInteger.TWO) > 0) {
+//            primeFactors.add(n);
+//        }
+//        return primeFactors;
+//    }
+//    private BigInteger randomBigInt(BigInteger minLimit, BigInteger maxLimit) {
+//        BigInteger bigInteger = maxLimit.subtract(minLimit);
+//        Random randNum = new Random();
+//        int len = maxLimit.bitLength();
+//        BigInteger res = new BigInteger(len, randNum);
+//        if (res.compareTo(minLimit) < 0)
+//            res = res.add(minLimit);
+//        if (res.compareTo(bigInteger) >= 0)
+//            res = res.mod(bigInteger).add(minLimit);
+//        return res;
+//    }
+//
+//}
+
+//===========================================================================
+
+//package elgamal;
+//import utils.MultiFile;
+//import utils.Utilities;
+//
+//import java.io.IOException;
+//import java.math.BigInteger;
+//import java.nio.file.Files;
+//import java.nio.file.Path;
+//import java.nio.file.Paths;
+//import java.security.MessageDigest;
+//import java.security.NoSuchAlgorithmException;
+//import java.util.Arrays;
+//import java.util.HashSet;
+//import java.util.Random;
+//import java.util.Set;
+//
+//public class ElgamalV2 {
+//    public KeyPair generateKeyPair(int keySize) {
+//        Set<BigInteger> primeFactors = primeFactor(keySize);
+//        BigInteger p = genP(primeFactors);
+//        BigInteger q = genQ(primeFactors, p);
+//        BigInteger u = genU(p);
+//        BigInteger y = fastExpo(q, u, p);
+//        PublicKey publicKey = new PublicKey(p, q, y);
+//        PrivateKey privateKey = new PrivateKey(u);
+//        return new KeyPair(publicKey, privateKey);
+//    }
+//    public void encryptFile(String filePath, PublicKey publicKey) throws Exception {
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        RandomKey randomKey = generateRandomKey(publicKey.getP());
+//        Path fileAttribute = Paths.get(filePath);
+//        MultiFile multiFile = new MultiFile(fileAttribute.getFileName().toString(), Files.readAllBytes(fileAttribute.toAbsolutePath()));
+//        byte[] fileBytes = Utilities.serialize(multiFile);
+//        int blockSize = publicKey.getP().toByteArray().length -1;
+//        int dataSize = blockSize - 1;
+//        int cipherSize = fileBytes.length / dataSize;
+//        int padSize = 0;
+//        if (fileBytes.length % dataSize != 0){
+//            padSize = blockSize;
+//        }
+//        BigInteger multiB = fastExpo(publicKey.getY(), randomKey.getRandomKey(), publicKey.getP());
+//        BigInteger a = fastExpo(publicKey.getQ(), randomKey.getRandomKey(), publicKey.getP());
+//        messageDigest.update(a.toByteArray());
+//        //PADDING + A (No SIGNATURE)
+//        byte[] cipher = new byte[(blockSize * cipherSize) + padSize + blockSize + messageDigest.getDigestLength()];
+//        int fileIndex = 0;
+//        int cipherIndex = 0;
+//        while (fileIndex < fileBytes.length - dataSize) {
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + dataSize));
+//            messageDigest.update(data.toByteArray());
+//            encryptByte(publicKey.getP(), data, multiB, blockSize, cipherIndex, cipher);
+//            fileIndex+= dataSize;
+//            cipherIndex += blockSize;
+//        }
+//        //ADD PADDING
+//        if (fileBytes.length % dataSize != 0){
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + (fileBytes.length % dataSize)));
+//            encryptByte(publicKey.getP(), data, multiB, blockSize, cipherIndex, cipher);
+//            messageDigest.update(data.toByteArray());
+//            cipherIndex += blockSize;
+//        }
+//        //ADD A
+//        setByte(blockSize, cipherIndex, cipher, a);
+//        cipherIndex += blockSize;
+//        byte[] mess = Arrays.copyOfRange(messageDigest.digest(), 0 , messageDigest.getDigestLength());
+//        System.out.println("Encrypted : " + Arrays.toString(mess));
+//        setByte(messageDigest.getDigestLength(), cipherIndex, cipher, new BigInteger(1, mess));
+//        Files.write(Path.of(fileAttribute.getParent() + "\\" +"file.encrypted"), cipher);
+//    }
+//    private void encryptByte(BigInteger p, BigInteger data, BigInteger multiB, int blockSize, int cipherIndex, byte[] cipher) {
+//        BigInteger b = (multiB.multiply(data)).mod(p);
+//        setByte(blockSize, cipherIndex, cipher, b);
+//    }
+//    private void setByte(int blockSize, int cipherIndex, byte[] cipher, BigInteger n) {
+//        if (n.toByteArray().length > blockSize){
+//            System.arraycopy(n.toByteArray(), 1, cipher, cipherIndex, blockSize);
+//        }
+//        else {
+//            int startAt = blockSize - n.toByteArray().length;
+//            System.arraycopy(n.toByteArray(), 0, cipher, cipherIndex + startAt, n.toByteArray().length);
+//        }
+//    }
+//    public void decryptFile(String filePath, PrivateKey privateKey, PublicKey publicKey) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        Path fileAttribute = Paths.get(filePath);
+//        byte[] cipher = Files.readAllBytes(fileAttribute.toAbsolutePath());
+//        int blockSize = publicKey.getP().toByteArray().length -1;
+//        int dataSize = blockSize - 1;
+//        int messageDigestSize = messageDigest.getDigestLength();
+//        int plainSize = (((cipher.length - messageDigestSize) / blockSize) -2) * dataSize;
+//        BigInteger a = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - blockSize - messageDigestSize, cipher.length - messageDigestSize));
+//        BigInteger b = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (2 * blockSize) - messageDigestSize, cipher.length - blockSize - messageDigestSize));
+//        BigInteger inverse = fastExpo(a, privateKey.getU(), publicKey.getP()).modInverse(publicKey.getP());
+//        BigInteger pad = b.multiply(inverse).mod(publicKey.getP());
+//        int padSize = pad.toByteArray().length;
+//        byte[] plain = new byte[plainSize + padSize];
+//        if (pad.toByteArray().length ==  dataSize){
+//            System.arraycopy(pad.toByteArray(), 0, plain, plain.length - dataSize , dataSize);
+//        }
+//        else if (pad.toByteArray().length > dataSize) {
+//            System.arraycopy(pad.toByteArray(), 1, plain, plain.length - dataSize, dataSize);
+//        }
+//        else {// <
+//            int startAt = Math.abs(pad.toByteArray().length - dataSize);
+//            System.arraycopy(pad.toByteArray(), 0, plain, plain.length - dataSize + startAt, pad.toByteArray().length);
+//        }
+//        messageDigest.update(a.toByteArray());
+//        int cipherIndex = 0;
+//        int plainIndex = 0;
+//        while (cipherIndex + (2 * blockSize) < cipher.length - messageDigestSize){
+//            b = new BigInteger(1, Arrays.copyOfRange(cipher, cipherIndex, cipherIndex + blockSize));
+//            b = b.multiply(inverse).mod(publicKey.getP());
+//            messageDigest.update(b.toByteArray());
+//            if (b.toByteArray().length ==  dataSize){
+//                System.arraycopy(b.toByteArray(), 0, plain, plainIndex, dataSize);
+//            }
+//            else if (b.toByteArray().length > dataSize) {
+//                System.arraycopy(b.toByteArray(), 1, plain, plainIndex, dataSize);
+//            }
+//            else {// <
+//                int startAt = Math.abs(b.toByteArray().length - dataSize);
+//                System.arraycopy(b.toByteArray(), 0, plain, plainIndex + startAt, b.toByteArray().length);
+//            }
+//            cipherIndex += blockSize;
+//            plainIndex += dataSize;
+//        }
+//        messageDigest.update(pad.toByteArray());
+//        System.out.println("Decrypted : " + Arrays.toString(messageDigest.digest()));
+//        MultiFile multiFile = (MultiFile) Utilities.deserialize(plain);
+//        Files.write(Path.of(fileAttribute.getParent() + "\\2-" + multiFile.getFileName()), multiFile.getContent());
+//    }
+//    public RandomKey generateRandomKey(BigInteger p){
+//        BigInteger k;
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        do {
+//            k = randomBigInt(min, max);
+//        }
+//        while (!max.gcd(k).equals(BigInteger.ONE));
+//        return new RandomKey(k);
+//    }
+//    private BigInteger genP(Set<BigInteger> primeFactor) {
+//        BigInteger p = BigInteger.ONE;
+//        for (BigInteger pi : primeFactor) {
+//            p = p.multiply(pi);
+//        }
+//        return p.add(BigInteger.ONE);
+//    }
+//    private BigInteger genQ(Set<BigInteger> primeFactor, BigInteger p) {
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger q;
+//        do {
+//            q = randomBigInt(min, max);
+//        }
+//        while (!isGenerator(q, primeFactor, p));
+//        return q;
+//    }
+//    private BigInteger genU(BigInteger p) {
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        return randomBigInt(min, max);
+//    }
+//    private boolean isGenerator(BigInteger u, Set<BigInteger> pf, BigInteger p) {
+//        for (BigInteger pi : pf) {
+//            BigInteger expo = p.subtract(BigInteger.ONE).divide(pi);
+//            BigInteger mod = fastExpo(u, expo, p);
+//            if (mod.equals(BigInteger.ONE)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//    public BigInteger fastExpo(BigInteger base, BigInteger expo, BigInteger p) {
+//        char[] binary = expo.toString(2).toCharArray();
+//        BigInteger res = BigInteger.ONE;
+//        if (binary[binary.length -1] == '1') {
+//            res = res.multiply(base).mod(p);
+//        }
+//        for (int i = binary.length -2; i > -1 ; i--) {
+//            base = base.modPow(BigInteger.TWO, p);
+//            if (binary[i] == '1'){
+//                res = res.multiply(base).mod(p);
+//            }
+//        }
+//        return res;
+//    }
+//    private Set<BigInteger> primeFactor(int keySize) {
+//        BigInteger min = BigInteger.TWO.pow(keySize -2);
+//        BigInteger max = BigInteger.TWO.pow(keySize -1).subtract(BigInteger.ONE);
+//        BigInteger avg = (min.add(max)).divide(BigInteger.TWO);
+//        BigInteger p = BigInteger.TWO;
+//        Set<BigInteger> primeFactors = new HashSet<>();
+//        primeFactors.add(p);
+//        do {
+//            BigInteger pf = randomBigInt(min, avg);
+//            if (pf.isProbablePrime(pf.bitLength())){
+//                BigInteger pp = p.multiply(pf).add(BigInteger.ONE);
+//                if (pp.isProbablePrime(pp.bitLength())){
+//                    primeFactors.add(pf);
+//                    p = pp;
+//                }
+//            }
+//        }
+//        while (p.equals(BigInteger.TWO));
+//        return primeFactors;
+//    }
+//    private BigInteger randomBigInt(BigInteger minLimit, BigInteger maxLimit) {
+//        BigInteger bigInteger = maxLimit.subtract(minLimit);
+//        Random randNum = new Random();
+//        int len = maxLimit.bitLength();
+//        BigInteger res = new BigInteger(len, randNum);
+//        if (res.compareTo(minLimit) < 0)
+//            res = res.add(minLimit);
+//        if (res.compareTo(bigInteger) >= 0)
+//            res = res.mod(bigInteger).add(minLimit);
+//        return res;
+//    }
+//
+//    //    public void encryptFile(String filePath, PublicKey publicKey) throws Exception {
+////        RandomKey randomKey = generateRandomKey(publicKey.getP());
+////        Path fileAttribute = Paths.get(filePath);
+////        MultiFile multiFile = new MultiFile(fileAttribute.getFileName().toString(), Files.readAllBytes(fileAttribute.toAbsolutePath()));
+////        byte[] fileBytes = Utilities.serialize(multiFile);
+////        int blockSize = publicKey.getP().toByteArray().length -1;
+////        int dataSize = blockSize - 1;
+////        int cipherSize = fileBytes.length / dataSize;
+////        int padSize = 0;
+////        if (fileBytes.length % dataSize != 0){
+////            padSize = blockSize;
+////        }
+////        BigInteger multiB = fastExpo(publicKey.getY(), randomKey.getRandomKey(), publicKey.getP());
+////        BigInteger a = fastExpo(publicKey.getQ(), randomKey.getRandomKey(), publicKey.getP());
+////        // PADDING + A (No SIGNATURE)
+////        byte[] cipher = new byte[(blockSize * cipherSize) + padSize + blockSize];
+////        int fileIndex = 0;
+////        int cipherIndex = 0;
+////        while (fileIndex < fileBytes.length - dataSize) {
+////            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + dataSize));
+////            BigInteger b =  (multiB.multiply(data)).mod(publicKey.getP());
+////            if (b.toByteArray().length > blockSize){
+////                System.arraycopy(b.toByteArray(), 1, cipher, cipherIndex, blockSize);
+////            }
+////            else if (b.toByteArray().length < blockSize){
+////                int startAt = Math.abs(b.toByteArray().length - blockSize);
+////                System.arraycopy(b.toByteArray(), 0, cipher, cipherIndex + startAt, b.toByteArray().length);
+////            }
+////            else {
+////                System.arraycopy(b.toByteArray(), 0, cipher, cipherIndex, blockSize);
+////            }
+////            fileIndex += dataSize;
+////            cipherIndex += blockSize;
+////        }
+////        //ADD PADDING
+////        if (fileBytes.length % dataSize != 0){
+////            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + (fileBytes.length % dataSize)));
+////            BigInteger b =  (multiB.multiply(data)).mod(publicKey.getP());
+////            if (b.toByteArray().length > blockSize){
+////                System.arraycopy(b.toByteArray(), 1, cipher, cipherIndex, blockSize);
+////            }
+////            else if (b.toByteArray().length < blockSize){
+////                int startAt = Math.abs(b.toByteArray().length - blockSize);
+////                System.arraycopy(b.toByteArray(), 0, cipher, cipherIndex + startAt, b.toByteArray().length);
+////            }
+////            else {
+////                System.arraycopy(b.toByteArray(), 0, cipher, cipherIndex, blockSize);
+////            }
+////
+////            cipherIndex += blockSize;
+////        }
+////        if (a.toByteArray().length > blockSize){
+////            System.arraycopy(a.toByteArray(), 1, cipher, cipherIndex, blockSize);
+////        }
+////        else if (a.toByteArray().length < blockSize){
+////            int startAt = Math.abs(a.toByteArray().length - blockSize);
+////            System.arraycopy(a.toByteArray(), 0, cipher, cipherIndex + startAt, a.toByteArray().length);
+////        }
+////        else {
+////            System.arraycopy(a.toByteArray(), 0, cipher, cipherIndex, blockSize);
+////        }
+////        Files.write(Path.of(fileAttribute.getParent() + "\\" +"file.encrypted"), cipher);
+////    }
+////    public void decryptFile(String filePath, PrivateKey privateKey, PublicKey publicKey) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+////        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+////        Path fileAttribute = Paths.get(filePath);
+////        byte[] cipher = Files.readAllBytes(fileAttribute.toAbsolutePath());
+////        int blockSize = publicKey.getP().toByteArray().length -1;
+////        int dataSize = blockSize - 1;
+////        int plainSize = ((cipher.length / blockSize) -2) * dataSize;
+////
+////        BigInteger a = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - blockSize, cipher.length));
+////        BigInteger b = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (2 * blockSize), cipher.length - blockSize));
+////        BigInteger res = fastExpo(a, privateKey.getU(), publicKey.getP()).modInverse(publicKey.getP());
+////        res = b.multiply(res).mod(publicKey.getP());
+////        int pad = res.toByteArray().length;
+////        byte[] plain = new byte[plainSize + pad];
+////        if (res.toByteArray().length ==  dataSize){
+////            System.arraycopy(res.toByteArray(), 0, plain, plain.length - dataSize , dataSize);
+////        }
+////        else if (res.toByteArray().length > dataSize) {
+////            System.arraycopy(res.toByteArray(), 1, plain, plain.length - dataSize, dataSize);
+////        }
+////        else {// <
+////            int startAt = Math.abs(res.toByteArray().length - dataSize);
+////            System.arraycopy(res.toByteArray(), 0, plain, plain.length - dataSize + startAt, res.toByteArray().length);
+////        }
+////        messageDigest.update(a.toByteArray());
+////        int cipherIndex = 0;
+////        int plainIndex = 0;
+////        while (cipherIndex + (2 * blockSize) < cipher.length){
+////            b = new BigInteger(1, Arrays.copyOfRange(cipher, cipherIndex, cipherIndex + blockSize));
+////            res = fastExpo(a, privateKey.getU(), publicKey.getP()).modInverse(publicKey.getP());
+////            res = b.multiply(res).mod(publicKey.getP());
+//////            System.out.println("res  : " + Arrays.toString(res.toByteArray()));
+////            messageDigest.update(res.toByteArray());
+////            if (res.toByteArray().length ==  dataSize){
+////                System.arraycopy(res.toByteArray(), 0, plain, plainIndex, dataSize);
+////            }
+////            else if (res.toByteArray().length > dataSize) {
+////                System.arraycopy(res.toByteArray(), 1, plain, plainIndex, dataSize);
+////            }
+////            else {// <
+////                int startAt = Math.abs(res.toByteArray().length - dataSize);
+////                System.arraycopy(res.toByteArray(), 0, plain, plainIndex + startAt, res.toByteArray().length);
+////            }
+////            cipherIndex += blockSize;
+////            plainIndex += dataSize;
+////        }
+////        MultiFile multiFile = (MultiFile) Utilities.deserialize(plain);
+////        Files.write(Path.of(fileAttribute.getParent() + "\\2-" + multiFile.getFileName()), multiFile.getContent());
+////        System.out.println("Message Digest : " + Arrays.toString(messageDigest.digest()));
+////    }
+//
+//}
+
+//===========================================================================
+
+//package elgamal;
+//import utils.MultiFile;
+//import utils.Utilities;
+//
+//import java.io.IOException;
+//import java.math.BigInteger;
+//import java.nio.file.Files;
+//import java.nio.file.Path;
+//import java.nio.file.Paths;
+//import java.security.MessageDigest;
+//import java.security.NoSuchAlgorithmException;
+//import java.util.Arrays;
+//import java.util.HashSet;
+//import java.util.Random;
+//import java.util.Set;
+//
+//public class ElgamalV3 {
+//    public KeyPair generateKeyPair(int keySize) {
+//        Set<BigInteger> primeFactors = primeFactor(keySize);
+//        BigInteger p = genP(primeFactors);
+//        BigInteger q = genQ(primeFactors, p);
+//        BigInteger u = genU(p);
+//        BigInteger y = q.modPow(u, p);
+//        PublicKey publicKey = new PublicKey(p, q, y);
+//        PrivateKey privateKey = new PrivateKey(u);
+//        return new KeyPair(publicKey, privateKey);
+//    }
+//    public void encryptFile(String filePath, PublicKey publicKey, PrivateKey privateKey) throws Exception {
+////      TODO HASH OVERFLOW
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        Path fileAttribute = Paths.get(filePath);
+//        MultiFile multiFile = new MultiFile(fileAttribute.getFileName().toString(), Files.readAllBytes(fileAttribute.toAbsolutePath()));
+//        byte[] fileBytes = Utilities.serialize(multiFile);
+//        int blockSize = publicKey.getP().toByteArray().length -1;
+//        int dataSize = blockSize - 1;
+//        int cipherSize = fileBytes.length / dataSize;
+//        int padSize = 0;
+//        if (fileBytes.length % dataSize != 0){
+//            padSize = blockSize;
+//        }
+//        BigInteger k = generateRandomKey(publicKey.getP()).getRandomKey();
+//        BigInteger p = publicKey.getP();
+//        BigInteger q = publicKey.getQ();
+//        BigInteger y = publicKey.getY();
+//        BigInteger u = privateKey.getU();
+//        BigInteger a = q.modPow(k, p);
+//        BigInteger multiB = y.modPow(k, p);
+//        messageDigest.update(a.toByteArray());
+//        //TEXT + PADDING + (A or R) + S
+//        byte[] cipher = new byte[(blockSize * cipherSize) + padSize + blockSize + blockSize];
+//        int fileIndex = 0;
+//        int cipherIndex = 0;
+//        while (fileIndex < fileBytes.length - dataSize) {
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + dataSize));
+//            messageDigest.update(data.toByteArray());
+//            encryptByte(p, data, multiB, blockSize, cipherIndex, cipher);
+//            fileIndex+= dataSize;
+//            cipherIndex += blockSize;
+//        }
+//        //ADD PADDING
+//        if (fileBytes.length % dataSize != 0){
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + (fileBytes.length % dataSize)));
+//            encryptByte(p, data, multiB, blockSize, cipherIndex, cipher);
+//            messageDigest.update(data.toByteArray());
+//            cipherIndex += blockSize;
+//        }
+//        //ADD A
+//        setByte(blockSize, cipherIndex, cipher, a);
+//        cipherIndex += blockSize;
+//        //ADD S
+//        BigInteger mess = new BigInteger(1, Arrays.copyOfRange(messageDigest.digest(), 0 , messageDigest.getDigestLength()));
+//        System.out.println("Hash   : " + Arrays.toString(mess.toByteArray()));
+//        mess = ((k.modInverse(p.subtract(BigInteger.ONE))).multiply(mess.subtract(u.multiply(a)))).mod(p.subtract(BigInteger.ONE));
+//        encryptByte(p, mess, multiB, blockSize, cipherIndex, cipher);
+//        System.out.println("Mess s : " + Arrays.toString(mess.toByteArray()));
+//        Files.write(Path.of(fileAttribute.getParent() + "\\" +"file.encrypted"), cipher);
+//    }
+//    private void encryptByte(BigInteger p, BigInteger data, BigInteger multiB, int blockSize, int cipherIndex, byte[] cipher) {
+//        BigInteger b = (multiB.multiply(data)).mod(p);
+//        setByte(blockSize, cipherIndex, cipher, b);
+//    }
+//    private void setByte(int blockSize, int cipherIndex, byte[] cipher, BigInteger n) {
+//        if (n.toByteArray().length > blockSize){
+//            System.arraycopy(n.toByteArray(), 1, cipher, cipherIndex, blockSize);
+//        }
+//        else {
+//            int startAt = blockSize - n.toByteArray().length;
+//            System.arraycopy(n.toByteArray(), 0, cipher, cipherIndex + startAt, n.toByteArray().length);
+//        }
+//    }
+//    public void decryptFile(String filePath, PrivateKey privateKey, PublicKey publicKey) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        Path fileAttribute = Paths.get(filePath);
+//        byte[] cipher = Files.readAllBytes(fileAttribute.toAbsolutePath());
+//        int blockSize = publicKey.getP().toByteArray().length -1;
+//        int dataSize  = blockSize - 1;
+//        int plainSize = (((cipher.length - blockSize) / blockSize) -2) * dataSize;
+//
+//        BigInteger p = publicKey.getP();
+//        BigInteger q = publicKey.getQ();
+//        BigInteger y = publicKey.getY();
+//        BigInteger u = privateKey.getU();
+//
+//        BigInteger  pad = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (3 * blockSize), cipher.length - (2 * blockSize)));
+//        BigInteger    a = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (2 * blockSize), cipher.length - blockSize));
+//        BigInteger mess = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - blockSize, cipher.length));
+//        BigInteger inverse = a.modPow(u, p).modInverse(p);
+//        pad  = pad.multiply(inverse).mod(p);
+//        mess = mess.multiply(inverse).mod(p);
+//        byte[] plain = new byte[plainSize + pad.toByteArray().length];
+//        setByte(dataSize, plain.length - dataSize, plain, pad);
+//        messageDigest.update(a.toByteArray());
+//        int cipherIndex = 0;
+//        int plainIndex = 0;
+//        while (cipherIndex + (2 * blockSize) < cipher.length - blockSize){
+//            BigInteger b = new BigInteger(1, Arrays.copyOfRange(cipher, cipherIndex, cipherIndex + blockSize));
+//            b = b.multiply(inverse).mod(p);
+//            setByte(dataSize, plainIndex, plain, b);
+//            messageDigest.update(b.toByteArray());
+//            cipherIndex += blockSize;
+//            plainIndex += dataSize;
+//        }
+//        byte[] hash = messageDigest.digest(pad.toByteArray());
+//        BigInteger qx = q.modPow(new BigInteger(1, hash), p);
+//        BigInteger yr = y.modPow(a, p);
+//        BigInteger rs = a.modPow(mess, p);
+//
+//        System.out.println("Mess s : " + Arrays.toString(mess.toByteArray()));
+//        System.out.println("Hash   : " + Arrays.toString(hash));
+//        if (qx.equals(yr.multiply(rs).mod(p))){
+//            System.out.println("Message verified");
+//            System.out.println("qu     : " + qx);
+//            System.out.println("yr*rs  : " + yr.multiply(rs).mod(publicKey.getP()));
+//        }
+//        else {
+//            System.out.println("Message unverified!!");
+//            System.out.println("Sent : " + Arrays.toString(mess.toByteArray()));
+//            System.out.println("Hash : " + Arrays.toString(hash));
+//        }
+//        MultiFile multiFile = (MultiFile) Utilities.deserialize(plain);
+//        Files.write(Path.of(fileAttribute.getParent() + "\\3-" + multiFile.getFileName()), multiFile.getContent());
+//    }
+//    public RandomKey generateRandomKey(BigInteger p){
+//        BigInteger k;
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        do {
+//            k = randomBigInt(min, max);
+//        }
+//        while (!max.gcd(k).equals(BigInteger.ONE));
+//        return new RandomKey(k);
+//    }
+//    private BigInteger genP(Set<BigInteger> primeFactor) {
+//        BigInteger p = BigInteger.ONE;
+//        for (BigInteger pi : primeFactor) {
+//            p = p.multiply(pi);
+//        }
+//        return p.add(BigInteger.ONE);
+//    }
+//    private BigInteger genQ(Set<BigInteger> primeFactor, BigInteger p) {
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger q;
+//        do {
+//            q = randomBigInt(min, max);
+//        }
+//        while (!isGenerator(q, primeFactor, p));
+//        return q;
+//    }
+//    private BigInteger genU(BigInteger p) {
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        return randomBigInt(min, max);
+//    }
+//    private boolean isGenerator(BigInteger u, Set<BigInteger> pf, BigInteger p) {
+//        for (BigInteger pi : pf) {
+//            BigInteger expo = p.subtract(BigInteger.ONE).divide(pi);
+//            BigInteger mod = u.modPow(expo, p);
+//            if (mod.equals(BigInteger.ONE)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//    private Set<BigInteger> primeFactor(int keySize) {
+//        BigInteger min = BigInteger.TWO.pow(keySize -2);
+//        BigInteger max = BigInteger.TWO.pow(keySize -1).subtract(BigInteger.ONE);
+//        BigInteger avg = (min.add(max)).divide(BigInteger.TWO);
+//        BigInteger p = BigInteger.TWO;
+//        Set<BigInteger> primeFactors = new HashSet<>();
+//        primeFactors.add(p);
+//        do {
+//            BigInteger pf = randomBigInt(min, avg);
+//            if (pf.isProbablePrime(pf.bitLength())){
+//                BigInteger pp = p.multiply(pf).add(BigInteger.ONE);
+//                if (pp.isProbablePrime(pp.bitLength())){
+//                    primeFactors.add(pf);
+//                    p = pp;
+//                }
+//            }
+//        }
+//        while (p.equals(BigInteger.TWO));
+//        return primeFactors;
+//    }
+//    private BigInteger randomBigInt(BigInteger minLimit, BigInteger maxLimit) {
+//        BigInteger bigInteger = maxLimit.subtract(minLimit);
+//        Random randNum = new Random();
+//        int len = maxLimit.bitLength();
+//        BigInteger res = new BigInteger(len, randNum);
+//        if (res.compareTo(minLimit) < 0)
+//            res = res.add(minLimit);
+//        if (res.compareTo(bigInteger) >= 0)
+//            res = res.mod(bigInteger).add(minLimit);
+//        return res;
+//    }
+////    public BigInteger fastExpo(BigInteger base, BigInteger expo, BigInteger p) {
+////        char[] binary = expo.toString(2).toCharArray();
+////        BigInteger res = BigInteger.ONE;
+////        if (binary[binary.length -1] == '1') {
+////            res = res.multiply(base).mod(p);
+////        }
+////        for (int i = binary.length -2; i > -1 ; i--) {
+////            base = base.modPow(BigInteger.TWO, p);
+////            if (binary[i] == '1'){
+////                res = res.multiply(base).mod(p);
+////            }
+////        }
+////        return res;
+////    }
+//
+//
+//}
+
+//===========================================================================
+
+//package elgamal;
+//import utils.MultiFile;
+//import utils.Utilities;
+//
+//import java.io.IOException;
+//import java.math.BigInteger;
+//import java.nio.file.Files;
+//import java.nio.file.Path;
+//import java.nio.file.Paths;
+//import java.security.MessageDigest;
+//import java.security.NoSuchAlgorithmException;
+//import java.util.Arrays;
+//import java.util.HashSet;
+//import java.util.Random;
+//import java.util.Set;
+//
+//public class ElgamalV4 {
+//    public static KeyPair generateKeyPair(int keySize) {
+//        Set<BigInteger> primeFactors = primeFactor(keySize);
+//        BigInteger p = genP(primeFactors);
+//        BigInteger q = genQ(primeFactors, p);
+//        BigInteger u = genU(p);
+//        BigInteger y = q.modPow(u, p);
+//        PublicKey publicKey = new PublicKey(p, q, y);
+//        PrivateKey privateKey = new PrivateKey(u);
+//        return new KeyPair(publicKey, privateKey);
+//    }
+//    public static  void encryptFile(String filePath, PublicKey publicKey, PrivateKey privateKey) throws Exception {
+////      TODO HASH OVERFLOW
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        Path fileAttribute = Paths.get(filePath);
+//        MultiFile multiFile = new MultiFile(fileAttribute.getFileName().toString(), Files.readAllBytes(fileAttribute.toAbsolutePath()));
+//        byte[] fileBytes = Utilities.serialize(multiFile);
+//        int blockSize = publicKey.getP().toByteArray().length -1;
+//        int dataSize = blockSize - 1;
+//        int cipherSize = fileBytes.length / dataSize;
+//        int padSize = 0;
+//        if (fileBytes.length % dataSize != 0){
+//            padSize = blockSize;
+//        }
+//        BigInteger k = generateRandomKey(publicKey.getP()).getRandomKey();
+//        BigInteger p = publicKey.getP();
+//        BigInteger q = publicKey.getQ();
+//        BigInteger y = publicKey.getY();
+//        BigInteger u = privateKey.getU();
+//        BigInteger a = q.modPow(k, p);
+//        BigInteger multiB = y.modPow(k, p);
+//        messageDigest.update(a.toByteArray());
+//        //TEXT + PADDING + (A or R) + S
+//        byte[] cipher = new byte[(blockSize * cipherSize) + padSize + blockSize + blockSize];
+//        int fileIndex = 0;
+//        int cipherIndex = 0;
+//        while (fileIndex < fileBytes.length - dataSize) {
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + dataSize));
+//            messageDigest.update(data.toByteArray());
+//            encryptByte(p, data, multiB, blockSize, cipherIndex, cipher);
+//            fileIndex+= dataSize;
+//            cipherIndex += blockSize;
+//        }
+//        //ADD PADDING
+//        if (fileBytes.length % dataSize != 0){
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + (fileBytes.length % dataSize)));
+//            encryptByte(p, data, multiB, blockSize, cipherIndex, cipher);
+//            messageDigest.update(data.toByteArray());
+//            cipherIndex += blockSize;
+//        }
+//        //ADD A
+//        setByte(blockSize, cipherIndex, cipher, a);
+//        cipherIndex += blockSize;
+//        //ADD S
+//        BigInteger mess = new BigInteger(1, Arrays.copyOfRange(messageDigest.digest(), 0 , messageDigest.getDigestLength()));
+//        System.out.println("Hash   : " + Arrays.toString(mess.toByteArray()));
+//        mess = ((k.modInverse(p.subtract(BigInteger.ONE))).multiply(mess.subtract(u.multiply(a)))).mod(p.subtract(BigInteger.ONE));
+//        encryptByte(p, mess, multiB, blockSize, cipherIndex, cipher);
+//        System.out.println("Mess s : " + Arrays.toString(mess.toByteArray()));
+//        Files.write(Path.of(fileAttribute.getParent() + "\\" +"file.encrypted"), cipher);
+////        System.out.println("Cipher : " + Arrays.toString(cipher));
+//    }
+//    public static  void encryptByte(BigInteger p, BigInteger data, BigInteger multiB, int blockSize, int cipherIndex, byte[] cipher) {
+//        BigInteger b = (multiB.multiply(data)).mod(p);
+//        setByte(blockSize, cipherIndex, cipher, b);
+//    }
+//    public static  void setByte(int blockSize, int cipherIndex, byte[] cipher, BigInteger n) {
+//        if (n.toByteArray().length > blockSize){
+//            System.arraycopy(n.toByteArray(), 1, cipher, cipherIndex, blockSize);
+//        }
+//        else {
+//            int startAt = blockSize - n.toByteArray().length;
+//            System.arraycopy(n.toByteArray(), 0, cipher, cipherIndex + startAt, n.toByteArray().length);
+//        }
+//    }
+//    public static  void decryptFile(String filePath, PrivateKey privateKey, PublicKey publicKey) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        Path fileAttribute = Paths.get(filePath);
+//        byte[] cipher = Files.readAllBytes(fileAttribute.toAbsolutePath());
+////        System.out.println("Cipher : " + Arrays.toString(cipher));
+//        int blockSize = publicKey.getP().toByteArray().length -1;
+//        int dataSize  = blockSize - 1;
+//        int plainSize = (((cipher.length - blockSize) / blockSize) -2) * dataSize;
+//
+//        BigInteger p = publicKey.getP();
+//        BigInteger q = publicKey.getQ();
+//        BigInteger y = publicKey.getY();
+//        BigInteger u = privateKey.getU();
+//
+//        BigInteger  pad = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (3 * blockSize), cipher.length - (2 * blockSize)));
+//        BigInteger    a = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (2 * blockSize), cipher.length - blockSize));
+//        BigInteger mess = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - blockSize, cipher.length));
+//        BigInteger inverse = a.modPow(u, p).modInverse(p);
+//        pad  = pad.multiply(inverse).mod(p);
+//        mess = mess.multiply(inverse).mod(p);
+//        byte[] plain = new byte[plainSize + pad.toByteArray().length];
+//        setByte(dataSize, plain.length - dataSize, plain, pad);
+//        messageDigest.update(a.toByteArray());
+//        int cipherIndex = 0;
+//        int plainIndex = 0;
+//        while (cipherIndex + (2 * blockSize) < cipher.length - blockSize){
+//            BigInteger b = new BigInteger(1, Arrays.copyOfRange(cipher, cipherIndex, cipherIndex + blockSize));
+//            b = b.multiply(inverse).mod(p);
+//            setByte(dataSize, plainIndex, plain, b);
+//            messageDigest.update(b.toByteArray());
+//            cipherIndex += blockSize;
+//            plainIndex += dataSize;
+//        }
+//        byte[] hash = messageDigest.digest(pad.toByteArray());
+//        BigInteger qx = q.modPow(new BigInteger(1, hash), p);
+//        BigInteger yr = y.modPow(a, p);
+//        BigInteger rs = a.modPow(mess, p);
+//
+//        System.out.println("Mess s : " + Arrays.toString(mess.toByteArray()));
+//        System.out.println("Hash   : " + Arrays.toString(hash));
+//        if (qx.equals(yr.multiply(rs).mod(p))){
+//            System.out.println("Message verified");
+//            System.out.println("qu     : " + qx);
+//            System.out.println("yr*rs  : " + yr.multiply(rs).mod(publicKey.getP()));
+//        }
+//        else {
+//            System.out.println("Message unverified!!");
+//            System.out.println("Sent : " + Arrays.toString(mess.toByteArray()));
+//            System.out.println("Hash : " + Arrays.toString(hash));
+//        }
+//        MultiFile multiFile = (MultiFile) Utilities.deserialize(plain);
+//        Files.write(Path.of(fileAttribute.getParent() + "\\3-" + multiFile.getFileName()), multiFile.getContent());
+//    }
+//    public static  RandomKey generateRandomKey(BigInteger p){
+//        BigInteger k;
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        do {
+//            k = randomBigInt(min, max);
+//        }
+//        while (!max.gcd(k).equals(BigInteger.ONE));
+//        return new RandomKey(k);
+//    }
+//    public static  BigInteger genP(Set<BigInteger> primeFactor) {
+//        BigInteger p = BigInteger.ONE;
+//        for (BigInteger pi : primeFactor) {
+//            p = p.multiply(pi);
+//        }
+//        return p.add(BigInteger.ONE);
+//    }
+//    public static  BigInteger genQ(Set<BigInteger> primeFactor, BigInteger p) {
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger q;
+//        do {
+//            q = randomBigInt(min, max);
+//        }
+//        while (!isGenerator(q, primeFactor, p));
+//        return q;
+//    }
+//    public static  BigInteger genU(BigInteger p) {
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        return randomBigInt(min, max);
+//    }
+//    public static  boolean isGenerator(BigInteger u, Set<BigInteger> pf, BigInteger p) {
+//        for (BigInteger pi : pf) {
+//            BigInteger expo = p.subtract(BigInteger.ONE).divide(pi);
+//            BigInteger mod = u.modPow(expo, p);
+//            if (mod.equals(BigInteger.ONE)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//    public static  Set<BigInteger> primeFactor(int keySize) {
+//        BigInteger min = BigInteger.TWO.pow(keySize -2);
+//        BigInteger max = BigInteger.TWO.pow(keySize -1).subtract(BigInteger.ONE);
+//        BigInteger avg = (min.add(max)).divide(BigInteger.TWO);
+//        BigInteger p = BigInteger.TWO;
+//        Set<BigInteger> primeFactors = new HashSet<>();
+//        primeFactors.add(p);
+//        do {
+//            BigInteger pf = randomBigInt(min, avg);
+//            if (pf.isProbablePrime(pf.bitLength())){
+//                BigInteger pp = p.multiply(pf).add(BigInteger.ONE);
+//                if (pp.isProbablePrime(pp.bitLength())){
+//                    primeFactors.add(pf);
+//                    p = pp;
+//                }
+//            }
+//        }
+//        while (p.equals(BigInteger.TWO));
+//        return primeFactors;
+//    }
+//    public static BigInteger randomBigInt(BigInteger minLimit, BigInteger maxLimit) {
+//        BigInteger bigInteger = maxLimit.subtract(minLimit);
+//        Random randNum = new Random();
+//        int len = maxLimit.bitLength();
+//        BigInteger res = new BigInteger(len, randNum);
+//        if (res.compareTo(minLimit) < 0)
+//            res = res.add(minLimit);
+//        if (res.compareTo(bigInteger) >= 0)
+//            res = res.mod(bigInteger).add(minLimit);
+//        return res;
+//    }
+////    public BigInteger fastExpo(BigInteger base, BigInteger expo, BigInteger p) {
+////        char[] binary = expo.toString(2).toCharArray();
+////        BigInteger res = BigInteger.ONE;
+////        if (binary[binary.length -1] == '1') {
+////            res = res.multiply(base).mod(p);
+////        }
+////        for (int i = binary.length -2; i > -1 ; i--) {
+////            base = base.modPow(BigInteger.TWO, p);
+////            if (binary[i] == '1'){
+////                res = res.multiply(base).mod(p);
+////            }
+////        }
+////        return res;
+////    }
+//
+//
+//}
+
+//===========================================================================
+
+//package elgamal;
+//import utils.MultiFile;
+//import utils.Utilities;
+//
+//import java.io.IOException;
+//import java.math.BigInteger;
+//import java.nio.file.Files;
+//import java.nio.file.Path;
+//import java.nio.file.Paths;
+//import java.security.MessageDigest;
+//import java.security.NoSuchAlgorithmException;
+//import java.util.Arrays;
+//import java.util.HashSet;
+//import java.util.Random;
+//import java.util.Set;
+//
+//public class ElgamalV5 {
+//    public KeyPair generateKeyPair(int keySize) {
+//        Set<BigInteger> primeFactors = primeFactor(keySize);
+//        BigInteger p = genP(primeFactors);
+//        BigInteger q = genQ(primeFactors, p);
+//        BigInteger u = genU(p);
+//        BigInteger y = q.modPow(u, p);
+//        PublicKey publicKey = new PublicKey(p, q, y);
+//        PrivateKey privateKey = new PrivateKey(u);
+//        return new KeyPair(publicKey, privateKey);
+//    }
+//    public void encryptFile(String filePath, PublicKey publicKey, PrivateKey privateKey) throws Exception {
+////      TODO HASH OVERFLOW
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        BigInteger p = publicKey.getP();
+//        BigInteger q = publicKey.getQ();
+//        BigInteger y = publicKey.getY();
+//        BigInteger u = privateKey.getU();
+//        BigInteger k = generateRandomKey(p).getRandomKey();
+//        BigInteger a = q.modPow(k, p);
+//        BigInteger multiB = y.modPow(k, p);
+//        messageDigest.update(a.toByteArray());
+//        Path fileAttribute = Paths.get(filePath);
+//        MultiFile multiFile = new MultiFile(fileAttribute.getFileName().toString(), Files.readAllBytes(fileAttribute.toAbsolutePath()));
+//        byte[] fileBytes = Utilities.serialize(multiFile);
+//        int blockSize = publicKey.getP().bitLength() / 8;
+//        int dataSize = blockSize - 1;
+//        int cipherSize = fileBytes.length / dataSize;
+//        int padSize = 0;
+//        if (fileBytes.length % dataSize != 0){
+//            padSize = blockSize;
+//        }
+//        //(A or R) + TEXT + PADDING + S
+//        byte[] cipher = new byte[blockSize + (blockSize * cipherSize) + padSize + blockSize];
+//        int fileIndex = 0;
+//        int cipherIndex = 0;
+//        //ADD A
+//        setByte(blockSize, cipherIndex, cipher, a);
+//        cipherIndex += blockSize;
+//        while (fileIndex < fileBytes.length - dataSize ) {
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + dataSize));
+//            messageDigest.update(data.toByteArray());
+//            encryptByte(p, data, multiB, blockSize, cipherIndex, cipher);
+//            fileIndex+= dataSize;
+//            cipherIndex += blockSize;
+//        }
+//        //ADD PADDING
+//        if (fileBytes.length % dataSize != 0){
+//            BigInteger data = new BigInteger(1, Arrays.copyOfRange(fileBytes, fileIndex, fileIndex + (fileBytes.length % dataSize)));
+//            encryptByte(p, data, multiB, blockSize, cipherIndex, cipher);
+//            messageDigest.update(data.toByteArray());
+//            cipherIndex += blockSize;
+//        }
+//        //ADD S
+//        BigInteger mess = new BigInteger(1, Arrays.copyOfRange(messageDigest.digest(), 0 , messageDigest.getDigestLength()));
+//        mess = ((k.modInverse(p.subtract(BigInteger.ONE))).multiply(mess.subtract(u.multiply(a)))).mod(p.subtract(BigInteger.ONE));
+//        encryptByte(p, mess, multiB, blockSize, cipherIndex, cipher);
+//        Files.write(Path.of(fileAttribute.getParent() + "\\" +"file.encrypted"), cipher);
+//    }
+//    public void encryptByte(BigInteger p, BigInteger data, BigInteger multiB, int blockSize, int cipherIndex, byte[] cipher) {
+//        BigInteger b = (multiB.multiply(data)).mod(p);
+//        setByte(blockSize, cipherIndex, cipher, b);
+//    }
+//    public void setByte(int blockSize, int index, byte[] cipher, BigInteger n) {
+//        if (n.toByteArray().length > blockSize){
+//            System.arraycopy(n.toByteArray(), 1, cipher, index, blockSize);
+//        }
+//        else {
+//            int startAt = blockSize - n.toByteArray().length;
+//            System.arraycopy(n.toByteArray(), 0, cipher, index + startAt, n.toByteArray().length);
+//        }
+//    }
+//    public void decryptFile(String filePath, PrivateKey privateKey, PublicKey publicKey) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+//        MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
+//        BigInteger p = publicKey.getP();
+//        BigInteger q = publicKey.getQ();
+//        BigInteger y = publicKey.getY();
+//        BigInteger u = privateKey.getU();
+//        Path fileAttribute = Paths.get(filePath);
+//        byte[] cipher = Files.readAllBytes(fileAttribute.toAbsolutePath());
+//        int blockSize = publicKey.getP().bitLength() / 8;
+//        int dataSize  = blockSize - 1;
+//        int plainSize = ((cipher.length / blockSize) - 3) * dataSize;
+//        BigInteger    a = new BigInteger(1, Arrays.copyOfRange(cipher, 0, blockSize));
+//        BigInteger  pad = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (2 * blockSize), cipher.length - blockSize));
+//        BigInteger mess = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - blockSize, cipher.length));
+//        BigInteger inverse = a.modPow(u, p).modInverse(p);
+//        pad  = pad.multiply(inverse).mod(p);
+//        mess = mess.multiply(inverse).mod(p);
+//        int padSize = pad.toByteArray().length;
+//        if (pad.toByteArray()[0] == 0) {
+//            padSize -= 1;
+//        }
+//        byte[] plain = new byte[plainSize + padSize];
+//        setPadByte(plain, pad);
+//        messageDigest.update(a.toByteArray());
+//        int cipherIndex = blockSize;
+//        int plainIndex = 0;
+//        while (cipherIndex + blockSize < cipher.length - blockSize){
+//            BigInteger b = new BigInteger(1, Arrays.copyOfRange(cipher, cipherIndex, cipherIndex + blockSize));
+//            b = b.multiply(inverse).mod(p);
+//            setByte(dataSize, plainIndex, plain, b);
+//            messageDigest.update(b.toByteArray());
+//            cipherIndex += blockSize;
+//            plainIndex += dataSize;
+//        }
+//        byte[] hash = messageDigest.digest(pad.toByteArray());
+//        BigInteger qx = q.modPow(new BigInteger(1, hash), p);
+//        BigInteger yr = y.modPow(a, p);
+//        BigInteger rs = a.modPow(mess, p);
+//
+//        if (qx.equals(yr.multiply(rs).mod(p))){
+//            System.out.println("Message verified");
+//            System.out.println("qu     : " + qx);
+//            System.out.println("yr*rs  : " + yr.multiply(rs).mod(publicKey.getP()));
+//        }
+//        else {
+//            System.out.println("Message unverified!!");
+//            System.out.println("Sent : " + Arrays.toString(mess.toByteArray()));
+//            System.out.println("Hash : " + Arrays.toString(hash));
+//        }
+//        MultiFile multiFile = (MultiFile) Utilities.deserialize(plain);
+//        Files.write(Path.of(fileAttribute.getParent() + "\\3-" + multiFile.getFileName()), multiFile.getContent());
+//    }
+//
+//    private void setPadByte(byte[] plain, BigInteger pad) {
+//        byte[] padByte = pad.toByteArray();
+//        if (pad.toByteArray()[0] == 0){
+//            padByte = Arrays.copyOfRange(pad.toByteArray(), 1, pad.toByteArray().length);
+//        }
+//        System.arraycopy(padByte, 0, plain, plain.length - padByte.length, padByte.length);
+//    }
+//
+//    public RandomKey generateRandomKey(BigInteger p){
+//        BigInteger k;
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        do {
+//            k = randomBigInt(min, max);
+//        }
+//        while (!max.gcd(k).equals(BigInteger.ONE));
+//        return new RandomKey(k);
+//    }
+//    public BigInteger genP(Set<BigInteger> primeFactor) {
+//        BigInteger p = BigInteger.ONE;
+//        for (BigInteger pi : primeFactor) {
+//            p = p.multiply(pi);
+//        }
+//        return p.add(BigInteger.ONE);
+//    }
+//    public BigInteger genQ(Set<BigInteger> primeFactor, BigInteger p) {
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger q;
+//        do {
+//            q = randomBigInt(min, max);
+//        }
+//        while (!isGenerator(q, primeFactor, p));
+//        return q;
+//    }
+//    public BigInteger genU(BigInteger p) {
+//        BigInteger min = BigInteger.TWO;
+//        BigInteger max = p.subtract(BigInteger.ONE);
+//        return randomBigInt(min, max);
+//    }
+//    public boolean isGenerator(BigInteger u, Set<BigInteger> pf, BigInteger p) {
+//        for (BigInteger pi : pf) {
+//            BigInteger expo = p.subtract(BigInteger.ONE).divide(pi);
+//            BigInteger mod = u.modPow(expo, p);
+//            if (mod.equals(BigInteger.ONE)) {
+//                return false;
+//            }
+//        }
+//        return true;
+//    }
+//    public Set<BigInteger> primeFactor(int keySize) {
+//        BigInteger min = BigInteger.TWO.pow(keySize -2);
+//        BigInteger max = BigInteger.TWO.pow(keySize -1).subtract(BigInteger.ONE);
+//        BigInteger avg = (min.add(max)).divide(BigInteger.TWO);
+//        BigInteger p = BigInteger.TWO;
+//        Set<BigInteger> primeFactors = new HashSet<>();
+//        primeFactors.add(p);
+//        do {
+//            BigInteger pf = randomBigInt(min, avg);
+//            if (pf.isProbablePrime(pf.bitLength())){
+//                BigInteger pp = p.multiply(pf).add(BigInteger.ONE);
+//                if (pp.isProbablePrime(pp.bitLength())){
+//                    primeFactors.add(pf);
+//                    p = pp;
+//                }
+//            }
+//        }
+//        while (p.equals(BigInteger.TWO));
+//        return primeFactors;
+//    }
+//    public BigInteger randomBigInt(BigInteger minLimit, BigInteger maxLimit) {
+//        BigInteger bigInteger = maxLimit.subtract(minLimit);
+//        Random randNum = new Random();
+//        int len = maxLimit.bitLength();
+//        BigInteger res = new BigInteger(len, randNum);
+//        if (res.compareTo(minLimit) < 0)
+//            res = res.add(minLimit);
+//        if (res.compareTo(bigInteger) >= 0)
+//            res = res.mod(bigInteger).add(minLimit);
+//        return res;
+//    }
+////    public BigInteger fastExpo(BigInteger base, BigInteger expo, BigInteger p) {
+////        char[] binary = expo.toString(2).toCharArray();
+////        BigInteger res = BigInteger.ONE;
+////        if (binary[binary.length -1] == '1') {
+////            res = res.multiply(base).mod(p);
+////        }
+////        for (int i = binary.length -2; i > -1 ; i--) {
+////            base = base.modPow(BigInteger.TWO, p);
+////            if (binary[i] == '1'){
+////                res = res.multiply(base).mod(p);
+////            }
+////        }
+////        return res;
+////    }
+//
+//
+//}
+
