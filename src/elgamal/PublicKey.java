@@ -1,8 +1,9 @@
 package elgamal;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 
-public class PublicKey {
+public class PublicKey implements Serializable {
     private BigInteger p;
     private BigInteger q;
     private BigInteger y;
