@@ -1,4 +1,5 @@
 package elgamal;
+import org.w3c.dom.ls.LSOutput;
 import utils.MultiFile;
 import utils.Utilities;
 
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Random;
@@ -35,8 +37,8 @@ public class Elgamal {
 //      TODO HASH OVERFLOW
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         BigInteger k = generateRandomKey(receiverPublic.getP()).getRandomKey();
-        BigInteger ks = generateRandomKey(senderPublic.getP()).getRandomKey();
         BigInteger a = receiverPublic.getQ().modPow(k, receiverPublic.getP());
+        BigInteger ks = generateRandomKey(senderPublic.getP()).getRandomKey();
         BigInteger r = senderPublic.getQ().modPow(ks, senderPublic.getP());
         BigInteger multiB = receiverPublic.getY().modPow(k, receiverPublic.getP());
         messageDigest.update(a.toByteArray());
@@ -76,9 +78,10 @@ public class Elgamal {
         }
         //ADD S
         BigInteger mess = new BigInteger(1, Arrays.copyOfRange(messageDigest.digest(), 0 , messageDigest.getDigestLength()));
-        System.out.println("Encryption Hash : " + Arrays.toString(mess.toByteArray()));
         mess = ((ks.modInverse(senderPublic.getP().subtract(BigInteger.ONE))).multiply(mess.subtract(senderPrivate.getU().multiply(r)))).mod(senderPublic.getP().subtract(BigInteger.ONE));
-        encryptByte(receiverPublic.getP(), mess, multiB, blockSize, cipherIndex, cipher);
+        //TODO S OVERFLOW
+//        encryptByte(receiverPublic.getP(), mess, multiB, blockSize, cipherIndex, cipher);
+        setByte(blockSize, cipherIndex, cipher, mess);
         Files.write(Path.of(fileAttribute.getParent() + "\\" + fileAttribute.getFileName().toString().split("\\.")[0] + ".encrypted"), cipher);
     }
     public void encryptByte(BigInteger p, BigInteger data, BigInteger multiB, int blockSize, int cipherIndex, byte[] cipher) {
@@ -109,12 +112,14 @@ public class Elgamal {
         int plainSize = ((cipher.length / blockSize) - 4) * dataSize;
         BigInteger    a = new BigInteger(1, Arrays.copyOfRange(cipher, 0, blockSize));
         BigInteger    r = new BigInteger(1, Arrays.copyOfRange(cipher, blockSize,  2 * blockSize));
+        System.out.println("r : " + Arrays.toString(r.toByteArray()));
 
         BigInteger  pad = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (2 * blockSize), cipher.length - blockSize));
         BigInteger mess = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - blockSize, cipher.length));
         BigInteger inverse = a.modPow(receiverPrivate.getU(), receiverPublic.getP()).modInverse(receiverPublic.getP());
         pad  = pad.multiply(inverse).mod(receiverPublic.getP());
-        mess = mess.multiply(inverse).mod(receiverPublic.getP());
+//        mess = mess.multiply(inverse).mod(receiverPublic.getP());
+        System.out.println("S : " + Arrays.toString(mess.toByteArray()));
         int padSize = pad.toByteArray().length;
         if (pad.toByteArray()[0] == 0) {
             padSize -= 1;
@@ -133,7 +138,6 @@ public class Elgamal {
             plainIndex += dataSize;
         }
         byte[] hash = messageDigest.digest(pad.toByteArray());
-        System.out.println("Hash : " + Arrays.toString(new BigInteger(1, hash).toByteArray()));
         BigInteger qx = senderPublic.getQ().modPow(new BigInteger(1, hash), senderPublic.getP());
         BigInteger yr = senderPublic.getY().modPow(r, senderPublic.getP());
         BigInteger rs = r.modPow(mess, senderPublic.getP());
@@ -230,6 +234,11 @@ public class Elgamal {
         if (res.compareTo(bigInteger) >= 0)
             res = res.mod(bigInteger).add(minLimit);
         return res;
+    }
+
+    public BigInteger randomBigInt(int bytesSpace){
+        SecureRandom secureRandom = new SecureRandom();
+        return new BigInteger(1, secureRandom.generateSeed(bytesSpace));
     }
 
 //    public BigInteger fastExpo(BigInteger base, BigInteger expo, BigInteger p) {

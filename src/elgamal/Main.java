@@ -2,6 +2,7 @@ package elgamal;
 
 import utils.Utilities;
 
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Scanner;
@@ -9,6 +10,43 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) throws Exception {
         Elgamal elgamal = new Elgamal();
+//        while (true) {
+//            KeyPair keyPair = elgamal.generateKeyPair(272);
+//            PublicKey publicKey = keyPair.getPublicKey();
+//            PrivateKey privateKey = keyPair.getPrivateKey();
+//            System.out.println("==== Public key ====");
+//            System.out.println("P : " + publicKey.getP());
+//            System.out.println("P : " + publicKey.getP().bitLength());
+//            System.out.println("Q : " + publicKey.getQ());
+//            System.out.println("Q : " + publicKey.getQ().bitLength());
+//            System.out.println("Y : " + publicKey.getY());
+//            System.out.println("Y : " + publicKey.getY().bitLength());
+//            System.out.println("==== Private key ====");
+//            System.out.println("U : " + privateKey.getU());
+//            System.out.println("U : " + privateKey.getU().bitLength());
+//
+//            KeyPair keyPair2 = elgamal.generateKeyPair(272);
+//            PublicKey publicKey2 = keyPair2.getPublicKey();
+//            PrivateKey privateKey2 = keyPair2.getPrivateKey();
+//            System.out.println("==== Public key ====");
+//            System.out.println("P : " + publicKey2.getP());
+//            System.out.println("P : " + publicKey2.getP().bitLength());
+//            System.out.println("Q : " + publicKey2.getQ());
+//            System.out.println("Q : " + publicKey2.getQ().bitLength());
+//            System.out.println("Y : " + publicKey2.getY());
+//            System.out.println("Y : " + publicKey2.getY().bitLength());
+//            System.out.println("==== Private key ====");
+//            System.out.println("U : " + privateKey2.getU());
+//            System.out.println("U : " + privateKey2.getU().bitLength());
+//
+//            String filePath = "C:\\Users\\wit_w\\Desktop\\Test\\Binder1.pdf";
+//            String encryptPath = "C:\\Users\\wit_w\\Desktop\\Test\\Binder1.encrypted";
+//
+//            elgamal.encryptFile(filePath, publicKey, publicKey2, privateKey2);
+//            elgamal.decryptFile(encryptPath, publicKey2, publicKey, privateKey);
+//
+//            break;
+//        }
         Scanner scanner = new Scanner(System.in);
         do {
             System.out.print("Command : " );
