@@ -1,4 +1,4 @@
-package utils;
+package elgamal;
 
 public class KeySpace {
     public static final int BIT16 = 16;

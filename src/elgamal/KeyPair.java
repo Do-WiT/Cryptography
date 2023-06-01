@@ -1,6 +1,8 @@
 package elgamal;
 
-public class KeyPair {
+import java.io.Serializable;
+
+public class KeyPair implements Serializable {
     private PublicKey publicKey;
     private PrivateKey privateKey;
 

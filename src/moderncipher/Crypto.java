@@ -1,5 +1,6 @@
 package moderncipher;
 
+import elgamal.KeySpace;
 import utils.*;
 import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
