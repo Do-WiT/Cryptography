@@ -2,25 +2,21 @@ package elgamal;
 import utils.MultiFile;
 import utils.Utilities;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 
-public class Elgamal2 {
+public class Elgamal3 {
     public KeyPair generateKeyPair(int keySize) {
         BigInteger p = genP(keySize);
         BigInteger q = genQ(p);
         BigInteger u = genU(p);
-        BigInteger y = q.modPow(u, p);
+        BigInteger y = fastExpo(q, u, p);
         PublicKey publicKey = new PublicKey(p, q, y);
         PrivateKey privateKey = new PrivateKey(u);
         return new KeyPair(publicKey, privateKey);
@@ -38,12 +34,12 @@ public class Elgamal2 {
             throw new Exception("Invalid!! The key size is less than sign!!");
         }
         BigInteger k = generateRandomKey(receiverPublic.getP()).getRandomKey();
-        BigInteger a = receiverPublic.getQ().modPow(k, receiverPublic.getP());
-        BigInteger multiB = receiverPublic.getY().modPow(k, receiverPublic.getP());
+        BigInteger a = fastExpo(receiverPublic.getQ(), k, receiverPublic.getP());
+        BigInteger multiB = fastExpo(receiverPublic.getY(), k, receiverPublic.getP());
         BigInteger b;
         messageDigest.update(a.toByteArray());
         BigInteger ks = generateRandomKey(senderPublic.getP()).getRandomKey();
-        BigInteger r = senderPublic.getQ().modPow(ks, senderPublic.getP());
+        BigInteger r = fastExpo(senderPublic.getQ(), ks, senderPublic.getP());
         messageDigest.update(r.toByteArray());
         Path fileAttribute = Paths.get(filePath);
         MultiFile multiFile = new MultiFile(fileAttribute.getFileName().toString(), Files.readAllBytes(fileAttribute.toAbsolutePath()));
@@ -123,7 +119,7 @@ public class Elgamal2 {
         BigInteger    r = new BigInteger(1, Arrays.copyOfRange(cipher, blockSize,  2 * blockSize));
         BigInteger  pad = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - (2 * blockSize), cipher.length - blockSize));
         BigInteger mess = new BigInteger(1, Arrays.copyOfRange(cipher, cipher.length - blockSize, cipher.length));
-        BigInteger inverse = a.modPow(receiverPrivate.getU(), receiverPublic.getP()).modInverse(receiverPublic.getP());
+        BigInteger inverse = fastExpo(a, receiverPrivate.getU(), receiverPublic.getP()).modInverse(receiverPublic.getP());
         messageDigest.update(a.toByteArray());
         messageDigest.update(r.toByteArray());
         pad  = pad.multiply(inverse).mod(receiverPublic.getP());
@@ -149,9 +145,9 @@ public class Elgamal2 {
             plainIndex += dataSize;
         }
         byte[] hash = messageDigest.digest();
-        BigInteger qx = senderPublic.getQ().modPow(new BigInteger(1, hash), senderPublic.getP());
-        BigInteger yr = senderPublic.getY().modPow(r, senderPublic.getP());
-        BigInteger rs = r.modPow(mess, senderPublic.getP());
+        BigInteger qx = fastExpo(senderPublic.getQ(), new BigInteger(1, hash), senderPublic.getP());
+        BigInteger yr = fastExpo(senderPublic.getY(), r, senderPublic.getP());
+        BigInteger rs = fastExpo(r, mess, senderPublic.getP());
         if (qx.equals((yr.multiply(rs)).mod(senderPublic.getP()))){
             System.out.println("==== Message verified =====");
             System.out.println("qu     : " + qx);
@@ -190,10 +186,16 @@ public class Elgamal2 {
         BigInteger max = BigInteger.TWO.pow(keySpace).subtract(BigInteger.ONE);
         BigInteger min = BigInteger.TWO.pow(keySpace -1);
         BigInteger p ;
+        BigInteger safeP;
         do {
             p = randomBigInt(min, max);
+            safeP = (p.subtract(BigInteger.ONE)).divide(BigInteger.TWO);
         }
-        while (!p.isProbablePrime(p.bitLength()));
+//        while (!p.isProbablePrime(p.bitLength()) || !safeP.isProbablePrime(safeP.bitLength()));
+        while (!isPrime(p, 100) || !isPrime(safeP, 100));
+
+        System.out.println("P : " + p);
+        System.out.println("Ps: " + safeP);
         return p;
     }
     public BigInteger genQ(BigInteger p) {
@@ -212,7 +214,7 @@ public class Elgamal2 {
     }
     public boolean isGenerator(BigInteger q, BigInteger p) {
         BigInteger expo = (p.subtract(BigInteger.ONE)).divide(BigInteger.TWO);
-        return !q.modPow(expo, p).equals(BigInteger.ONE);
+        return !fastExpo(q, expo, p).equals(BigInteger.ONE);
     }
     public BigInteger randomBigInt(BigInteger minLimit, BigInteger maxLimit) {
         BigInteger bigInteger = maxLimit.subtract(minLimit);
@@ -225,27 +227,13 @@ public class Elgamal2 {
             res = res.mod(bigInteger).add(minLimit);
         return res;
     }
-    public BigInteger randomBigInt(int bytesSpace){
-        SecureRandom secureRandom = new SecureRandom();
-        return new BigInteger(1, secureRandom.generateSeed(bytesSpace));
-    }
     public boolean isPrime(BigInteger n, int loop) {
         for (int i = 0; i < loop; i++) {
-            BigInteger randomNum = randomBigInt(BigInteger.TWO, n.sqrt());
-            BigInteger gcd = randomNum.gcd(n);
-            BigInteger expo = (n.subtract(BigInteger.ONE)).divide(BigInteger.TWO);
-            if (gcd.compareTo(BigInteger.ONE) > 0){
-//                System.out.println("gcd : " + gcd);
+            BigInteger randomNum = randomBigInt(BigInteger.TWO, n.subtract(BigInteger.ONE));
+            BigInteger expo = n.subtract(BigInteger.ONE).divide(BigInteger.TWO);
+            BigInteger p = fastExpo(randomNum, expo, n);
+            if (!p.equals(BigInteger.ONE) && !p.equals(n.subtract(BigInteger.ONE)))
                 return false;
-            }
-            else if ((randomNum.modPow(expo, n)).equals(BigInteger.ONE) || (randomNum.modPow(expo, n)).equals(BigInteger.ONE.negate())){
-                continue;
-            }
-            else {
-//                System.out.println("gcd : " + gcd);
-//                System.out.println("pow : " + (randomNum.modPow(expo, n)));
-                return false;
-            }
         }
         return true;
     }
@@ -256,7 +244,7 @@ public class Elgamal2 {
             res = res.multiply(base).mod(p);
         }
         for (int i = binary.length -2; i > -1 ; i--) {
-            base = base.modPow(BigInteger.TWO, p);
+            base = base.pow(2).mod(p);
             if (binary[i] == '1'){
                 res = res.multiply(base).mod(p);
             }
